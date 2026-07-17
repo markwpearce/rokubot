@@ -1,0 +1,67 @@
+{
+  "name": "rokubot",
+  "version": "0.1.0",
+  "description": "A CLI for driving any Roku device via ECP and roku-deploy — built for Roku developers and for AI agents to explore, screenshot, and learn an app.",
+  "keywords": [
+    "roku",
+    "ecp",
+    "cli",
+    "roku-deploy",
+    "brightscript",
+    "ai-agent"
+  ],
+  "license": "MIT",
+  "author": "Mark Pearce",
+  "homepage": "https://github.com/markwpearce/rokubot#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markwpearce/rokubot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/markwpearce/rokubot/issues"
+  },
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "rokubot": "bin/rokubot.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "needle": "^3.3.1",
+    "roku-deploy": "4.0.0-alpha.2",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/needle": "^3.3.0",
+    "@types/node": "^20.14.0",
+    "@types/yargs": "^17.0.32",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
+  }
+}
