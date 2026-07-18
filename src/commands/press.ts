@@ -10,6 +10,7 @@ interface PressArgs extends GlobalArgs {
   key: string;
   action: 'keypress' | 'keydown' | 'keyup';
   screenshot: boolean;
+  scale: number;
 }
 
 export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
@@ -29,6 +30,11 @@ export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
         type: 'boolean',
         default: false,
         describe: 'Capture a screenshot immediately after sending the key, to see the result in one call',
+      })
+      .option('scale', {
+        type: 'number',
+        default: 1,
+        describe: 'With --screenshot, shrink it by this factor, e.g. 0.5 for half size',
       }),
   handler: async (argv) => {
     try {
@@ -43,7 +49,7 @@ export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
         await rokuDeploy.keyPress({ host: config.host, key });
       }
 
-      const screenshotPath = argv.screenshot ? await captureScreenshot(config) : undefined;
+      const screenshotPath = argv.screenshot ? await captureScreenshot(config, undefined, argv.scale) : undefined;
       printResult(
         { sent: argv.key, action: argv.action, screenshot: screenshotPath ?? null },
         argv.json,

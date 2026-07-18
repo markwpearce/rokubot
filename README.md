@@ -41,6 +41,26 @@ Or use it without installing:
 npx rokubot info --host 192.168.1.50 --password <dev-password>
 ```
 
+### Fast invocation for tight loops
+
+`npx` re-resolves the package on every call, which adds noticeable overhead if you're calling
+`rokubot` many times in a row - e.g. an agent's screenshot→act loop. For that, skip `npx` and call
+the installed CLI file directly instead:
+
+```
+# Installed locally as a project dependency:
+./node_modules/.bin/rokubot press up --screenshot
+
+# Or straight at the built file:
+./node_modules/rokubot/dist/cli.js press up --screenshot
+
+# Installed globally, `rokubot` is already the direct binary - no npx needed:
+rokubot press up --screenshot
+```
+
+All three invoke the same file with no extra resolution step; prefer whichever path is easiest to
+reference in your agent's working directory.
+
 ## Setup
 
 Every command needs a device host and its developer password (the same ones you use to open
@@ -62,9 +82,9 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot apps` | List installed apps/channels |
 | `rokubot active-app` | Which app is currently in the foreground |
 | `rokubot launch [appId]` `--param k=v` | Launch or deep-link into an app (`appId` defaults to `dev`, the id a sideloaded channel always runs as) |
-| `rokubot press <key>` `--action keypress\|keydown\|keyup` `--screenshot` | Send a remote key (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...) |
-| `rokubot text <text>` `--screenshot` | Type literal text, e.g. into a search box |
-| `rokubot screenshot` `--dir <path>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home) |
+| `rokubot press <key>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` | Send a remote key (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...) |
+| `rokubot text <text>` `--screenshot` `--scale <factor>` | Type literal text, e.g. into a search box |
+| `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` shrinks it to half size (a quarter of the pixels) - cheaper for an agent to read |
 | `rokubot console` `--send "<cmd>"` `--timeout <ms>` | Stream the debug console, or send one command and get its response back |
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
@@ -78,6 +98,7 @@ Pass `--json` to any command for machine-readable output.
 # See what's currently on screen, then navigate and look again
 rokubot screenshot
 rokubot press down --screenshot   # one round trip: press, then screenshot the result
+rokubot press down --screenshot --scale 0.5   # ...and shrink it to half size before an agent reads it
 
 # Type into a search box
 rokubot press select
@@ -103,6 +124,10 @@ rokubot launch dev
 3. Decide the next action and call `rokubot press`/`rokubot text`/`rokubot launch` again.
 4. Repeat until the goal is reached, calling `rokubot active-app` or `rokubot console --send` for
    extra ground truth when the screen alone isn't enough.
+
+For this loop, invoke the installed CLI file directly rather than through `npx` (see [Fast
+invocation for tight loops](#fast-invocation-for-tight-loops)), and pass `--scale 0.5` on
+screenshots to shrink what the agent has to read.
 
 Every command supports `--json`, so an agent can parse results reliably instead of scraping
 human-formatted text.
@@ -141,6 +166,9 @@ console.log(await ecp.getActiveApp());
   you need reliable structured variable/stack inspection, `roku-debug` is worth layering in later.
 - `rokubot screenshot` only works while a sideloaded/dev channel is in the foreground - that's a
   limitation of Roku's screenshot ECP endpoint, not of this tool.
+- Taking a screenshot during video playback will likely capture a black frame - Roku's screenshot
+  API doesn't read back the video plane (HDCP/DRM content in particular is never captured), so
+  don't rely on it to see what's actually playing, only surrounding UI.
 
 ## Development
 
