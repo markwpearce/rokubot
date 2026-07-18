@@ -1,6 +1,6 @@
 {
   "name": "rokubot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A CLI for driving any Roku device via ECP and roku-deploy — built for Roku developers and for AI agents to explore, screenshot, and learn an app.",
   "keywords": [
     "roku",
