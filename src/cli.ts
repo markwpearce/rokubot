@@ -9,6 +9,7 @@ import { pressCommand } from './commands/press';
 import { textCommand } from './commands/text';
 import { screenshotCommand } from './commands/screenshot';
 import { consoleCommand } from './commands/console';
+import { interactiveCommand } from './commands/interactive';
 import { sideloadCommand } from './commands/sideload';
 import { ecpCommand } from './commands/ecp';
 import { skillCommand } from './commands/skill';
@@ -28,6 +29,7 @@ export function run(argv: string[] = hideBin(process.argv)): void {
     .command(textCommand)
     .command(screenshotCommand)
     .command(consoleCommand)
+    .command(interactiveCommand)
     .command(sideloadCommand)
     .command(ecpCommand)
     .command(skillCommand)
