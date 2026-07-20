@@ -84,7 +84,7 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot launch [appId]` `--param k=v` | Launch or deep-link into an app (`appId` defaults to `dev`, the id a sideloaded channel always runs as) |
 | `rokubot press <key>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` | Send a remote key (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...) |
 | `rokubot text <text>` `--screenshot` `--scale <factor>` | Type literal text, e.g. into a search box |
-| `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` produces a smaller output file (960x540 vs 1920x1080, ~14% smaller on disk) - see [Known limitations](#known-limitations) for the speed tradeoff |
+| `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` produces a smaller output file - see [Known limitations](#known-limitations) for the speed tradeoff |
 | `rokubot console` `--send "<cmd>"` `--timeout <ms>` | Stream the debug console, or send one command and get its response back |
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
@@ -173,14 +173,13 @@ console.log(await ecp.getActiveApp());
   API doesn't read back the video plane (HDCP/DRM content in particular is never captured), so
   don't rely on it to see what's actually playing, only surrounding UI.
 - `--scale` does not make `rokubot screenshot` faster - the device always sends the full-resolution
-  image over the network regardless of this flag, and shrinking happens afterward, client-side.
-  Benchmarked against a real device (5 runs each, same screen): full-size 1920x1080 averaged
-  **2411ms**; `--scale 0.5` (960x540) averaged **2604ms** - about 8% *slower*, since decoding,
-  resizing, and re-encoding the JPEG costs more than it saves. What you get in exchange is a
-  smaller output file (in this benchmark, 55,495 → 47,968 bytes, ~14% smaller on disk - less than
-  the 75% pixel reduction would suggest, since JPEG compression already handles a lot of that).
-  Use `--scale` when you want a cheaper file for an agent to transmit/process, not when you want a
-  faster CLI call.
+  image over the network regardless of this flag, and shrinking happens afterward, client-side, by
+  decoding, resizing, and re-encoding the JPEG. That costs more time than it saves, so a scaled
+  call is slightly *slower* than a full-size one, not faster. What you get in exchange is a smaller
+  output file, though by how much depends heavily on the screen's content (a full quarter-pixel
+  reduction rarely translates into a proportional file-size drop, since JPEG compression already
+  squeezes out a lot of that). Use `--scale` when you want a cheaper file for an agent to
+  transmit/process, not when you want a faster CLI call.
 
 ## Development
 
