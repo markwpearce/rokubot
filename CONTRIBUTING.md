@@ -18,6 +18,7 @@ npm test
   library).
 - Keep commands' human output and `--json` output in sync - every command should return the same
   data through both paths (see `src/output.ts`).
+- Update `CHANGELOG.md` under `[Unreleased]` for any user-facing change.
 
 ## Project layout
 
