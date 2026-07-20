@@ -1,5 +1,8 @@
 # rokubot
 
+[![npm version](https://img.shields.io/npm/v/rokubot.svg)](https://www.npmjs.com/package/rokubot)
+[![CI](https://github.com/markwpearce/rokubot/actions/workflows/ci.yml/badge.svg)](https://github.com/markwpearce/rokubot/actions/workflows/ci.yml)
+
 A CLI for driving **any** Roku device — sideload, remote control, screenshots, and debug console —
 built for Roku developers and for AI agents that need to explore an app and document what it does.
 
@@ -30,6 +33,8 @@ an agent can learn an app and write a `SKILL.md` about it (see [Using rokubot wi
 agents](#using-rokubot-with-ai-agents) below).
 
 ## Install
+
+[rokubot is on npm](https://www.npmjs.com/package/rokubot):
 
 ```
 npm install -g rokubot
