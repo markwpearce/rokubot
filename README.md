@@ -87,15 +87,34 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot apps` | List installed apps/channels |
 | `rokubot active-app` | Which app is currently in the foreground |
 | `rokubot launch [appId]` `--param k=v` | Launch or deep-link into an app (`appId` defaults to `dev`, the id a sideloaded channel always runs as) |
-| `rokubot press <key>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` | Send a remote key (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...) |
+| `rokubot press <key..>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` `--delay <seconds>` | Send one or more remote keys in order (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...), pausing `--delay` (default `0.25`) seconds between each |
 | `rokubot text <text>` `--screenshot` `--scale <factor>` | Type literal text, e.g. into a search box |
 | `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` produces a smaller output file - see [Known limitations](#known-limitations) for the speed tradeoff |
 | `rokubot console` `--send "<cmd>"` `--timeout <ms>` | Stream the debug console, or send one command and get its response back |
+| `rokubot interactive` | Drive the device live from your keyboard while the debug console streams in the background - see [key mapping](#rokubot-interactive-key-mapping) below |
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
 | `rokubot skill init` `--app-name <name>` `--out <path>` | Scaffold a `SKILL.md` template to fill in while exploring an app |
 
 Pass `--json` to any command for machine-readable output.
+
+### `rokubot interactive` key mapping
+
+| Keyboard | Sends |
+| --- | --- |
+| Up / Down / Left / Right | `up` / `down` / `left` / `right` |
+| Enter | `select` |
+| Backspace | `back` |
+| Space | `play` |
+| `h` | `home` |
+| `i` | `info` |
+| `r` | `rev` |
+| `f` | `fwd` |
+| `*` | `instantreplay` |
+| Esc | Pause navigation and send a one-off debug-console command (like `console --send`), then resume |
+| `q` / Ctrl+C | Quit |
+
+This same table is also printed at the start of every `rokubot interactive` session and via `rokubot interactive --help`.
 
 ### Examples
 
@@ -108,6 +127,12 @@ rokubot press down --screenshot --scale 0.5   # ...and shrink the output file (s
 # Type into a search box
 rokubot press select
 rokubot text "the mandalorian"
+
+# Send a sequence of key presses in one call, e.g. to back out three levels of navigation
+rokubot press back back back --delay 0.5
+
+# Drive the device live from the keyboard, with the debug console streaming alongside
+rokubot interactive
 
 # Deep-link into a piece of content
 rokubot launch dev --param contentId=abc123 --param mediaType=movie
@@ -124,7 +149,7 @@ rokubot launch dev
 
 `rokubot` is built around a simple loop an agent can drive without any special tooling:
 
-1. `rokubot screenshot` (or `rokubot press <key> --screenshot`) to see the current state.
+1. `rokubot screenshot` (or `rokubot press <key..> --screenshot`) to see the current state.
 2. Read the screenshot file with whatever image-reading tool the agent has.
 3. Decide the next action and call `rokubot press`/`rokubot text`/`rokubot launch` again.
 4. Repeat until the goal is reached, calling `rokubot active-app` or `rokubot console --send` for
