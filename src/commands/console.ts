@@ -51,6 +51,57 @@ export function sendAndCollect(
   });
 }
 
+const DEBUGGER_PROMPT_RE = /Brightscript\s+Debugger>/i;
+
+/**
+ * Checks whether the app is currently paused at a BrightScript Micro Debugger prompt (e.g. after
+ * a crash, or an explicit breakpoint) rather than just quiet/idle. A stale/unchanged screenshot is
+ * ambiguous on its own - it could mean nothing happened, or that the app died and is frozen at a
+ * debugger prompt showing its last frame forever - so this settles that without a manual detour
+ * through `console`.
+ *
+ * Connecting to the console replays some recent scrollback, which could contain an old debugger
+ * prompt from a crash that's since been resumed (`cont`). To avoid that false positive, this waits
+ * for the replay to settle, sends a blank line, and only counts a prompt seen *after* that probe -
+ * the debugger reprints its prompt in response to input, while a running app won't echo anything
+ * resembling it.
+ */
+export function checkDebuggerState(
+  host: string,
+  port?: number,
+  settleMs: number = 400,
+  probeMs: number = 800,
+): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const socket = openConsoleSocket(host, port);
+    let probed = false;
+    let pausedAtBreakpoint = false;
+    let settleTimer: NodeJS.Timeout;
+    let probeTimer: NodeJS.Timeout;
+
+    const finish = () => {
+      clearTimeout(settleTimer);
+      clearTimeout(probeTimer);
+      socket.destroy();
+      resolve(pausedAtBreakpoint);
+    };
+
+    socket.on('connect', () => {
+      settleTimer = setTimeout(() => {
+        probed = true;
+        socket.write('\r\n');
+        probeTimer = setTimeout(finish, probeMs);
+      }, settleMs);
+    });
+    socket.on('data', (chunk) => {
+      if (probed && DEBUGGER_PROMPT_RE.test(chunk.toString())) {
+        pausedAtBreakpoint = true;
+      }
+    });
+    socket.on('error', reject);
+  });
+}
+
 function streamConsole(host: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const socket = openConsoleSocket(host);

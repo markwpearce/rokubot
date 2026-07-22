@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `press` key names are now case-insensitive and accept common aliases (`ok`=`select`,
   `ff`/`forward`/`fastforward`=`fwd`, `rw`/`rewind`=`rev`, `options`/`*`=`info`,
   `replay`=`instantreplay`, and more).
+- `press` now throws a clear error listing valid keys/aliases when given an unrecognized key name.
+- `rokubot debugger-state` command to check whether the app is currently paused at a BrightScript
+  Micro Debugger prompt (crashed or hit a breakpoint), distinguishing that from a merely idle/
+  unchanged screen without a manual console detour.
 
 ## [0.2.0] - 2026-07-17
 
