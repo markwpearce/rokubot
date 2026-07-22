@@ -29,4 +29,10 @@ describe('resolveKey', () => {
     expect(resolveKey('FF')).toBe('fwd');
     expect(resolveKey('Options')).toBe('info');
   });
+
+  it('throws on unrecognized key names', () => {
+    expect(() => resolveKey('nope')).toThrow(/Unrecognized key 'nope'/);
+    expect(() => resolveKey('selectt')).toThrow(/Unrecognized key 'selectt'/);
+    expect(() => resolveKey('')).toThrow(/Unrecognized key ''/);
+  });
 });
