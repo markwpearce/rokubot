@@ -91,6 +91,7 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot text <text>` `--screenshot` `--scale <factor>` | Type literal text, e.g. into a search box |
 | `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` produces a smaller output file - see [Known limitations](#known-limitations) for the speed tradeoff |
 | `rokubot console` `--send "<cmd>"` `--timeout <ms>` | Stream the debug console, or send one command and get its response back |
+| `rokubot debugger-state` | Check whether the app is currently paused at a BrightScript Micro Debugger prompt (crashed or hit a breakpoint) vs. just idle - a frozen screenshot alone can't tell you which |
 | `rokubot interactive` | Drive the device live from your keyboard while the debug console streams in the background - see [key mapping](#rokubot-interactive-key-mapping) below |
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
@@ -154,6 +155,10 @@ rokubot launch dev
 3. Decide the next action and call `rokubot press`/`rokubot text`/`rokubot launch` again.
 4. Repeat until the goal is reached, calling `rokubot active-app` or `rokubot console --send` for
    extra ground truth when the screen alone isn't enough.
+
+If the screen stops changing, that's ambiguous - nothing may be happening, or the app may have
+crashed into a BrightScript Micro Debugger prompt and is frozen showing its last frame forever.
+Run `rokubot debugger-state` to tell the two apart without a manual detour through `console`.
 
 For this loop, invoke the installed CLI file directly rather than through `npx` (see [Fast
 invocation for tight loops](#fast-invocation-for-tight-loops)). If you want smaller screenshot
