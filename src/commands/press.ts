@@ -1,9 +1,9 @@
 import type { CommandModule } from 'yargs';
 import { RokuDeploy } from 'roku-deploy';
-import type { RokuKey } from 'roku-deploy';
 import { resolveConfig } from '../config';
 import { printResult, printError } from '../output';
 import { captureScreenshot } from './screenshot';
+import { resolveKey } from '../keys';
 import type { GlobalArgs } from '../cli-types';
 
 interface PressArgs extends GlobalArgs {
@@ -28,7 +28,9 @@ export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
         type: 'string',
         array: true,
         demandOption: true,
-        describe: 'One or more ECP keys to send in order, e.g. `press up up select`',
+        describe:
+          'One or more ECP keys to send in order, e.g. `press up up select`. Case-insensitive, and accepts ' +
+          'common aliases: ok=select, ff/forward/fastforward=fwd, rw/rewind=rev, options/*=info, replay=instantreplay',
       })
       .option('action', {
         type: 'string',
@@ -58,7 +60,7 @@ export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
     try {
       const config = resolveConfig({ host: argv.host, password: argv.password });
       const rokuDeploy = new RokuDeploy();
-      const keys = argv.key as RokuKey[];
+      const keys = argv.key.map(resolveKey);
 
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i]!;

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `press` key names are now case-insensitive and accept common aliases (`ok`=`select`,
+  `ff`/`forward`/`fastforward`=`fwd`, `rw`/`rewind`=`rev`, `options`/`*`=`info`,
+  `replay`=`instantreplay`, and more).
+
 ## [0.2.0] - 2026-07-17
 
 ### Added
