@@ -87,7 +87,7 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot apps` | List installed apps/channels |
 | `rokubot active-app` | Which app is currently in the foreground |
 | `rokubot launch [appId]` `--param k=v` | Launch or deep-link into an app (`appId` defaults to `dev`, the id a sideloaded channel always runs as) |
-| `rokubot press <key..>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` `--delay <seconds>` | Send one or more remote keys in order (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...), pausing `--delay` (default `0.25`) seconds between each |
+| `rokubot press <key..>` `--action keypress\|keydown\|keyup` `--screenshot` `--scale <factor>` `--delay <seconds>` | Send one or more remote keys in order (`up`/`down`/`left`/`right`/`select`/`back`/`home`/`play`/`rev`/`fwd`/`instantreplay`/`info`/`backspace`/`search`/`enter`/...), pausing `--delay` (default `0.25`) seconds between each. Key names are case-insensitive and accept aliases: `ok`=`select`, `ff`/`forward`/`fastforward`=`fwd`, `rw`/`rewind`=`rev`, `options`/`*`=`info`, `replay`=`instantreplay` |
 | `rokubot text <text>` `--screenshot` `--scale <factor>` | Type literal text, e.g. into a search box |
 | `rokubot screenshot` `--dir <path>` `--scale <factor>` | Capture a screenshot (requires a sideloaded/dev channel to be in the foreground - Roku's screenshot API doesn't work from Home). `--scale 0.5` produces a smaller output file - see [Known limitations](#known-limitations) for the speed tradeoff |
 | `rokubot console` `--send "<cmd>"` `--timeout <ms>` | Stream the debug console, or send one command and get its response back |
