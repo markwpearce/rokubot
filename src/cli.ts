@@ -14,6 +14,7 @@ import { interactiveCommand } from './commands/interactive';
 import { sideloadCommand } from './commands/sideload';
 import { ecpCommand } from './commands/ecp';
 import { skillCommand } from './commands/skill';
+import { texturesCommand } from './commands/textures';
 
 export function run(argv: string[] = hideBin(process.argv)): void {
   yargs(argv)
@@ -33,6 +34,7 @@ export function run(argv: string[] = hideBin(process.argv)): void {
     .command(debuggerStateCommand)
     .command(interactiveCommand)
     .command(sideloadCommand)
+    .command(texturesCommand)
     .command(ecpCommand)
     .command(skillCommand)
     .demandCommand(1)

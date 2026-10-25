@@ -94,6 +94,8 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot debugger-state` | Check whether the app is currently paused at a BrightScript Micro Debugger prompt (crashed or hit a breakpoint) vs. just idle - a frozen screenshot alone can't tell you which |
 | `rokubot interactive` | Drive the device live from your keyboard while the debug console streams in the background - see [key mapping](#rokubot-interactive-key-mapping) below |
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
+| `rokubot textures` `--top <n>` `--all` `--group` `--save <file>` `--watch` `--interval <seconds>` `--assert-max-used <MB>` `--assert-min-free <MB>` | Texture (graphics) memory: used/free/max and the largest bitmaps, totals by file with `--group`, or one line per sample with `--watch`. The asserts exit with an error past a limit, for CI. See [Texture memory](#texture-memory) |
+| `rokubot textures diff <before> [after]` | Compare a report saved with `--save` against another, or against the device now, to find bitmaps that were never freed |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
 | `rokubot skill init` `--app-name <name>` `--out <path>` | Scaffold a `SKILL.md` template to fill in while exploring an app |
 
@@ -192,6 +194,29 @@ const config = resolveConfig({ host: '192.168.1.50', password: 'abcd' });
 const ecp = new EcpClient({ host: config.host });
 console.log(await ecp.getActiveApp());
 ```
+
+## Texture memory
+
+`rokubot textures` reads ECP `query/r2d2-bitmaps`. The device needs developer mode and **Settings >
+System > Advanced system settings > Control by mobile apps** enabled. Texture memory is
+much smaller than system memory (some HD devices have only 64 MB), and a full pool usually shows up
+as images that silently fail to load, not as a crash.
+
+```bash
+rokubot textures                 # used/free/max and the 10 largest bitmaps
+rokubot textures --group         # totals by file path or font
+rokubot textures --assert-min-free 20   # exits with an error under 20 MB free
+
+# Find a texture leak: snapshot, go into a screen and back out, compare
+rokubot textures --save before.json
+rokubot press select --delay 2 && rokubot press back --delay 2
+rokubot textures diff before.json
+```
+
+Bitmaps loaded from a file are named by their path (`pkg:/images/poster.png`) and fonts by their
+face and size. Bitmaps the app created itself (`roBitmap`, offscreen buffers) only have an address
+(`WL-0x...`), which `--group` puts together under `(unnamed)`. The report covers every bitmap in
+texture memory, including some the OS created, not just the app's.
 
 ## Known limitations
 

@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { parseR2d2Bitmaps, type TextureReport } from '../textures';
 
 export interface EcpClientOptions {
   host: string;
@@ -104,6 +105,11 @@ export class EcpClient {
       });
     }
     return apps;
+  }
+
+  /** Texture memory usage and every loaded bitmap. Needs developer mode and "Control by mobile apps" enabled. */
+  async getTextureReport(): Promise<TextureReport> {
+    return parseR2d2Bitmaps(await request(this.host, this.port, 'GET', '/query/r2d2-bitmaps', this.timeoutMs));
   }
 
   /** Launch (or deep-link into) an app. appId defaults to "dev", the id a sideloaded channel always runs as. */
