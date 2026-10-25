@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `rokubot textures` command showing texture memory used/free/max and the largest bitmaps (ECP
+  `query/r2d2-bitmaps`), with `--group` to total by file, `--watch` to sample over time,
+  `--assert-max-used`/`--assert-min-free` to fail past a limit, and `--save` plus
+  `rokubot textures diff` to find bitmaps that were never freed.
+- `EcpClient.getTextureReport()` and the texture report helpers in the programmatic API.
+
 ## [0.3.0] - 2026-07-22
 
 ### Added

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
 import { EcpClient } from '../../src/ecp/client';
 
 /**
@@ -31,6 +33,10 @@ describe('EcpClient', () => {
       if (req.url?.startsWith('/launch/')) {
         res.statusCode = 200;
         res.end();
+        return;
+      }
+      if (req.url === '/query/r2d2-bitmaps') {
+        res.end(fs.readFileSync(path.join(__dirname, '../fixtures/r2d2-bitmaps.xml'), 'utf8'));
         return;
       }
       if (req.url === '/boom') {
@@ -86,6 +92,13 @@ describe('EcpClient', () => {
   it('launch defaults to the "dev" app id with no params', async () => {
     await client().launch();
     expect(requests).toEqual([{ method: 'POST', url: '/launch/dev' }]);
+  });
+
+  it('getTextureReport queries r2d2-bitmaps and parses it', async () => {
+    const report = await client().getTextureReport();
+    expect(requests).toEqual([{ method: 'GET', url: '/query/r2d2-bitmaps' }]);
+    expect(report.bitmapCount).toBe(6);
+    expect(report.textureMemory.max).toBe(240000000);
   });
 
   it('raw() exposes any path for anything not covered by a dedicated method', async () => {
