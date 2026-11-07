@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `rokubot perf [appId]` command showing the foreground (or a given) app's CPU and memory use
+  (ECP `query/chanperf`), with `--watch`/`--duration` to sample over time and summarize,
+  `--out` to save every sample as CSV or JSON, and `--assert-max-mem`/`--assert-max-cpu` to fail
+  past a limit.
+- `EcpClient.getChanperf()` and the perf helpers in the programmatic API.
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

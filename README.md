@@ -96,6 +96,7 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot textures` `--top <n>` `--all` `--group` `--save <file>` `--watch` `--interval <seconds>` `--assert-max-used <MB>` `--assert-min-free <MB>` | Texture (graphics) memory: used/free/max and the largest bitmaps, totals by file with `--group`, or one line per sample with `--watch`. The asserts exit with an error past a limit, for CI. See [Texture memory](#texture-memory) |
 | `rokubot textures diff <before> [after]` | Compare a report saved with `--save` against another, or against the device now, to find bitmaps that were never freed |
+| `rokubot perf [appId]` `--cpu-window <seconds>` `--watch` `--duration <seconds>` `--interval <seconds>` `--out <file>` `--assert-max-mem <MB>` `--assert-max-cpu <percent>` | CPU and memory of the foreground app (or `appId`), once or sampled over time with a min/avg/p95/max summary. See [Performance](#performance) |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
 | `rokubot skill init` `--app-name <name>` `--out <path>` | Scaffold a `SKILL.md` template to fill in while exploring an app |
 
@@ -217,6 +218,23 @@ Bitmaps loaded from a file are named by their path (`pkg:/images/poster.png`) an
 face and size. Bitmaps the app created itself (`roBitmap`, offscreen buffers) only have an address
 (`WL-0x...`), which `--group` puts together under `(unnamed)`. The report covers every bitmap in
 texture memory, including some the OS created, not just the app's.
+
+## Performance
+
+`perf` reads ECP `query/chanperf`. Like `textures`, it needs developer mode and **Control by mobile
+apps** enabled.
+
+```bash
+rokubot perf                          # one CPU/memory reading of the foreground app
+rokubot perf dev --duration 30 --out perf.csv --assert-max-mem 150
+```
+
+The device measures CPU over a window (`--cpu-window`, 1 second by default) before `query/chanperf`
+answers, so each reading takes at least that long. A shorter window gives faster but noisier
+readings.
+
+`--assert-max-mem`/`--assert-max-cpu` compare against the peak sample of the run. Memory is in
+decimal megabytes, the same as texture memory.
 
 ## Known limitations
 

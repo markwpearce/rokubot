@@ -1,5 +1,6 @@
 import * as http from 'http';
 import { parseR2d2Bitmaps, type TextureReport } from '../textures';
+import { parseChanperf, type ChanperfSample } from '../perf';
 
 export interface EcpClientOptions {
   host: string;
@@ -110,6 +111,23 @@ export class EcpClient {
   /** Texture memory usage and every loaded bitmap. Needs developer mode and "Control by mobile apps" enabled. */
   async getTextureReport(): Promise<TextureReport> {
     return parseR2d2Bitmaps(await request(this.host, this.port, 'GET', '/query/r2d2-bitmaps', this.timeoutMs));
+  }
+
+  /**
+   * CPU and memory of the foreground app, or of `appId`. Needs developer mode and "Control by
+   * mobile apps" enabled. The device measures CPU over `cpuWindowSeconds` (1 by default) before it
+   * answers, so the call takes at least that long.
+   */
+  async getChanperf(appId?: string, cpuWindowSeconds?: number): Promise<ChanperfSample> {
+    let urlPath = '/query/chanperf';
+    if (appId) {
+      urlPath += `/${encodeURIComponent(appId)}`;
+    }
+    if (cpuWindowSeconds !== undefined) {
+      urlPath += `?duration-seconds=${encodeURIComponent(String(cpuWindowSeconds))}`;
+    }
+    const timeoutMs = this.timeoutMs + (cpuWindowSeconds ?? 1) * 1000;
+    return parseChanperf(await request(this.host, this.port, 'GET', urlPath, timeoutMs));
   }
 
   /** Launch (or deep-link into) an app. appId defaults to "dev", the id a sideloaded channel always runs as. */

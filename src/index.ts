@@ -21,3 +21,7 @@ export type {
   GraphicsInstance,
   BitmapGroup,
 } from './textures';
+export { parseChanperf } from './perf';
+export type { ChanperfSample, ChanperfCpu, ChanperfMemory } from './perf';
+export { summarize } from './sampling';
+export type { Summary } from './sampling';

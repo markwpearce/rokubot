@@ -15,6 +15,7 @@ import { sideloadCommand } from './commands/sideload';
 import { ecpCommand } from './commands/ecp';
 import { skillCommand } from './commands/skill';
 import { texturesCommand } from './commands/textures';
+import { perfCommand } from './commands/perf';
 
 export function run(argv: string[] = hideBin(process.argv)): void {
   yargs(argv)
@@ -35,6 +36,7 @@ export function run(argv: string[] = hideBin(process.argv)): void {
     .command(interactiveCommand)
     .command(sideloadCommand)
     .command(texturesCommand)
+    .command(perfCommand)
     .command(ecpCommand)
     .command(skillCommand)
     .demandCommand(1)
