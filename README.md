@@ -97,6 +97,7 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot textures` `--top <n>` `--all` `--group` `--save <file>` `--watch` `--interval <seconds>` `--assert-max-used <MB>` `--assert-min-free <MB>` | Texture (graphics) memory: used/free/max and the largest bitmaps, totals by file with `--group`, or one line per sample with `--watch`. The asserts exit with an error past a limit, for CI. See [Texture memory](#texture-memory) |
 | `rokubot textures diff <before> [after]` | Compare a report saved with `--save` against another, or against the device now, to find bitmaps that were never freed |
 | `rokubot perf [appId]` `--cpu-window <seconds>` `--watch` `--duration <seconds>` `--interval <seconds>` `--out <file>` `--assert-max-mem <MB>` `--assert-max-cpu <percent>` | CPU and memory of the foreground app (or `appId`), once or sampled over time with a min/avg/p95/max summary. See [Performance](#performance) |
+| `rokubot fps` `--watch` `--duration <seconds>` `--interval <seconds>` `--out <file>` `--assert-min <fps>` `--assert-min-p5 <fps>` | Rendered graphics frame rate (not video), once or sampled over time with a min/p5/avg/max summary |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
 | `rokubot skill init` `--app-name <name>` `--out <path>` | Scaffold a `SKILL.md` template to fill in while exploring an app |
 
@@ -221,20 +222,22 @@ texture memory, including some the OS created, not just the app's.
 
 ## Performance
 
-`perf` reads ECP `query/chanperf`. Like `textures`, it needs developer mode and **Control by mobile
-apps** enabled.
+`perf` and `fps` read ECP `query/chanperf` and `query/graphics-frame-rate` (Roku OS 12.0+). Like
+`textures`, they need developer mode and **Control by mobile apps** enabled.
 
 ```bash
 rokubot perf                          # one CPU/memory reading of the foreground app
 rokubot perf dev --duration 30 --out perf.csv --assert-max-mem 150
+rokubot fps --duration 10 --assert-min-p5 50   # fail if the slowest 5% of readings drop under 50 fps
 ```
 
 The device measures CPU over a window (`--cpu-window`, 1 second by default) before `query/chanperf`
 answers, so each reading takes at least that long. A shorter window gives faster but noisier
 readings.
 
-`--assert-max-mem`/`--assert-max-cpu` compare against the peak sample of the run. Memory is in
-decimal megabytes, the same as texture memory.
+Asserts compare against the whole run: `--assert-max-mem`/`--assert-max-cpu` against the peak
+sample, `fps --assert-min` against the average and `--assert-min-p5` against the 5th percentile.
+Memory is in decimal megabytes, the same as texture memory.
 
 ## Known limitations
 

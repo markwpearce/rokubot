@@ -43,6 +43,10 @@ describe('EcpClient', () => {
         res.end(fs.readFileSync(path.join(__dirname, '../fixtures/chanperf.xml'), 'utf8'));
         return;
       }
+      if (req.url === '/query/graphics-frame-rate') {
+        res.end('<graphics-frame-rate><fps>58.5</fps><status>OK</status></graphics-frame-rate>');
+        return;
+      }
       if (req.url === '/boom') {
         res.statusCode = 500;
         res.end('server error');
@@ -119,6 +123,12 @@ describe('EcpClient', () => {
   it('getChanperf queries a given app with a cpu window', async () => {
     await client().getChanperf('dev', 3);
     expect(requests).toEqual([{ method: 'GET', url: '/query/chanperf/dev?duration-seconds=3' }]);
+  });
+
+  it('getGraphicsFrameRate queries graphics-frame-rate and parses it', async () => {
+    const sample = await client().getGraphicsFrameRate();
+    expect(requests).toEqual([{ method: 'GET', url: '/query/graphics-frame-rate' }]);
+    expect(sample.fps).toBe(58.5);
   });
 
   it('raw() exposes any path for anything not covered by a dedicated method', async () => {

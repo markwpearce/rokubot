@@ -23,5 +23,7 @@ export type {
 } from './textures';
 export { parseChanperf } from './perf';
 export type { ChanperfSample, ChanperfCpu, ChanperfMemory } from './perf';
+export { parseGraphicsFrameRate } from './fps';
+export type { FrameRateSample } from './fps';
 export { summarize } from './sampling';
 export type { Summary } from './sampling';

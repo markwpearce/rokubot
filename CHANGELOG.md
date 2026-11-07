@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (ECP `query/chanperf`), with `--watch`/`--duration` to sample over time and summarize,
   `--out` to save every sample as CSV or JSON, and `--assert-max-mem`/`--assert-max-cpu` to fail
   past a limit.
-- `EcpClient.getChanperf()` and the perf helpers in the programmatic API.
+- `rokubot fps` command showing the rendered graphics frame rate (ECP
+  `query/graphics-frame-rate`), with the same sampling and `--out` options plus
+  `--assert-min`/`--assert-min-p5` for perf gates.
+- `EcpClient.getChanperf()`/`getGraphicsFrameRate()` and the perf and fps helpers in the
+  programmatic API.
 
 ## [0.4.0] - 2026-10-25
 

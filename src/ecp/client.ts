@@ -1,6 +1,7 @@
 import * as http from 'http';
 import { parseR2d2Bitmaps, type TextureReport } from '../textures';
 import { parseChanperf, type ChanperfSample } from '../perf';
+import { parseGraphicsFrameRate, type FrameRateSample } from '../fps';
 
 export interface EcpClientOptions {
   host: string;
@@ -128,6 +129,11 @@ export class EcpClient {
     }
     const timeoutMs = this.timeoutMs + (cpuWindowSeconds ?? 1) * 1000;
     return parseChanperf(await request(this.host, this.port, 'GET', urlPath, timeoutMs));
+  }
+
+  /** Recent rendered graphics frame rate (not video). Roku OS 12.0+, developer mode and "Control by mobile apps". */
+  async getGraphicsFrameRate(): Promise<FrameRateSample> {
+    return parseGraphicsFrameRate(await request(this.host, this.port, 'GET', '/query/graphics-frame-rate', this.timeoutMs));
   }
 
   /** Launch (or deep-link into) an app. appId defaults to "dev", the id a sideloaded channel always runs as. */
