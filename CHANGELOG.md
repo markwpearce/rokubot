@@ -16,7 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rokubot fps` command showing the rendered graphics frame rate (ECP
   `query/graphics-frame-rate`), with the same sampling and `--out` options plus
   `--assert-min`/`--assert-min-p5` for perf gates.
-- `EcpClient.getChanperf()`/`getGraphicsFrameRate()` and the perf and fps helpers in the
+- `rokubot monitor [appId]` command combining CPU, memory, texture memory and fps on one live
+  timeline, optionally while pressing a `--keys` script, with a per-step summary, JSON/CSV lines,
+  `--out` and an `--html` chart report.
+- `EcpClient.getChanperf()`/`getGraphicsFrameRate()` and the perf, fps and monitor helpers in the
   programmatic API.
 
 ## [0.4.0] - 2026-10-25
