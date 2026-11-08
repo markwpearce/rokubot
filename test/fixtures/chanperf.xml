@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chanperf>
+	<timestamp>1794091777214</timestamp>
+	<plugin>
+		<cpu-percent>
+			<duration-seconds>2.000000</duration-seconds>
+			<user>25.1</user>
+			<sys>0.1</sys>
+		</cpu-percent>
+		<proc-stat>
+			<utime>1194</utime>
+			<stime>37</stime>
+			<cutime>0</cutime>
+			<cstime>0</cstime>
+			<minflt>7513</minflt>
+			<majflt>0</majflt>
+			<cminflt>0</cminflt>
+			<cmajflt>0</cmajflt>
+			<starttime>11631179</starttime>
+			<state>S</state>
+			<clk-tck>100</clk-tck>
+		</proc-stat>
+		<memory>
+			<used>23183360</used>
+			<res>23183360</res>
+			<anon>7643136</anon>
+			<swap>0</swap>
+			<file>15286272</file>
+			<shared>253952</shared>
+			<limit>859832320</limit>
+		</memory>
+		<id>dev</id>
+	</plugin>
+	<status>OK</status>
+</chanperf>

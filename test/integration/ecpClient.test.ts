@@ -39,6 +39,14 @@ describe('EcpClient', () => {
         res.end(fs.readFileSync(path.join(__dirname, '../fixtures/r2d2-bitmaps.xml'), 'utf8'));
         return;
       }
+      if (req.url?.startsWith('/query/chanperf')) {
+        res.end(fs.readFileSync(path.join(__dirname, '../fixtures/chanperf.xml'), 'utf8'));
+        return;
+      }
+      if (req.url === '/query/graphics-frame-rate') {
+        res.end('<graphics-frame-rate><fps>58.5</fps><status>OK</status></graphics-frame-rate>');
+        return;
+      }
       if (req.url === '/boom') {
         res.statusCode = 500;
         res.end('server error');
@@ -99,6 +107,33 @@ describe('EcpClient', () => {
     expect(requests).toEqual([{ method: 'GET', url: '/query/r2d2-bitmaps' }]);
     expect(report.bitmapCount).toBe(6);
     expect(report.textureMemory.max).toBe(240000000);
+  });
+
+  it('getChanperf queries the foreground app by default', async () => {
+    const sample = await client().getChanperf();
+    expect(requests).toEqual([{ method: 'GET', url: '/query/chanperf' }]);
+    expect(sample.memory.used).toBe(23183360);
+  });
+
+  it('getChanperf passes a cpu window for the foreground app too', async () => {
+    await client().getChanperf(undefined, 0.5);
+    expect(requests).toEqual([{ method: 'GET', url: '/query/chanperf?duration-seconds=0.5' }]);
+  });
+
+  it('getChanperf queries a given app with a cpu window', async () => {
+    await client().getChanperf('dev', 3);
+    expect(requests).toEqual([{ method: 'GET', url: '/query/chanperf/dev?duration-seconds=3' }]);
+  });
+
+  it('getChanperf rejects a cpu window that is not positive', async () => {
+    await expect(client().getChanperf(undefined, -10)).rejects.toThrow(/Invalid CPU window '-10'/);
+    expect(requests).toEqual([]);
+  });
+
+  it('getGraphicsFrameRate queries graphics-frame-rate and parses it', async () => {
+    const sample = await client().getGraphicsFrameRate();
+    expect(requests).toEqual([{ method: 'GET', url: '/query/graphics-frame-rate' }]);
+    expect(sample.fps).toBe(58.5);
   });
 
   it('raw() exposes any path for anything not covered by a dedicated method', async () => {

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `rokubot perf [appId]` command showing the foreground (or a given) app's CPU and memory use
+  (ECP `query/chanperf`), with `--watch`/`--duration` to sample over time and summarize,
+  `--out` to save every sample as CSV or JSON, and `--assert-max-mem`/`--assert-max-cpu` to fail
+  past a limit.
+- `rokubot fps` command showing the rendered graphics frame rate (ECP
+  `query/graphics-frame-rate`), with the same sampling and `--out` options plus
+  `--assert-min`/`--assert-min-p5` for perf gates.
+- `rokubot monitor [appId]` command combining CPU, memory, texture memory and fps on one live
+  timeline, optionally while pressing a `--keys` script, with a per-step summary, JSON/CSV lines,
+  `--out` and an `--html` chart report.
+- `EcpClient.getChanperf()`/`getGraphicsFrameRate()` and the perf, fps and monitor helpers in the
+  programmatic API.
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

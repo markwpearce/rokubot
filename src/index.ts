@@ -21,3 +21,11 @@ export type {
   GraphicsInstance,
   BitmapGroup,
 } from './textures';
+export { parseChanperf } from './perf';
+export type { ChanperfSample, ChanperfCpu, ChanperfMemory } from './perf';
+export { parseGraphicsFrameRate } from './fps';
+export type { FrameRateSample } from './fps';
+export { summarize } from './sampling';
+export type { Summary } from './sampling';
+export { summarizeMonitor, renderMonitorHtml } from './monitor';
+export type { MonitorSample, MonitorSummary, MonitorStepSummary, MonitorMetric } from './monitor';

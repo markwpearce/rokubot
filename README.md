@@ -96,6 +96,9 @@ Precedence is flags > env vars > `.env` > `rokubot.config.json`.
 | `rokubot sideload <projectDirOrZip>` `--deleteDevChannel` | Stage+zip+sideload a Roku project, or sideload an existing `.zip` |
 | `rokubot textures` `--top <n>` `--all` `--group` `--save <file>` `--watch` `--interval <seconds>` `--assert-max-used <MB>` `--assert-min-free <MB>` | Texture (graphics) memory: used/free/max and the largest bitmaps, totals by file with `--group`, or one line per sample with `--watch`. The asserts exit with an error past a limit, for CI. See [Texture memory](#texture-memory) |
 | `rokubot textures diff <before> [after]` | Compare a report saved with `--save` against another, or against the device now, to find bitmaps that were never freed |
+| `rokubot perf [appId]` `--cpu-window <seconds>` `--watch` `--duration <seconds>` `--interval <seconds>` `--out <file>` `--assert-max-mem <MB>` `--assert-max-cpu <percent>` | CPU and memory of the foreground app (or `appId`), once or sampled over time with a min/avg/p95/max summary. See [Performance](#performance) |
+| `rokubot fps` `--watch` `--duration <seconds>` `--interval <seconds>` `--out <file>` `--assert-min <fps>` `--assert-min-p5 <fps>` | Rendered graphics frame rate (not video), once or sampled over time with a min/p5/avg/max summary |
+| `rokubot monitor [appId]` `--cpu-window <seconds>` `--interval <seconds>` `--duration <seconds>` `--metrics perf textures fps` `--keys "<key..>"` `--delay <seconds>` `--csv` `--out <file>` `--html <file>` | CPU, memory, texture memory and fps on one live timeline, optionally while pressing a key script, with a per-step breakdown and an HTML report |
 | `rokubot ecp <method> <path>` | Raw ECP escape hatch for anything not covered above |
 | `rokubot skill init` `--app-name <name>` `--out <path>` | Scaffold a `SKILL.md` template to fill in while exploring an app |
 
@@ -217,6 +220,36 @@ Bitmaps loaded from a file are named by their path (`pkg:/images/poster.png`) an
 face and size. Bitmaps the app created itself (`roBitmap`, offscreen buffers) only have an address
 (`WL-0x...`), which `--group` puts together under `(unnamed)`. The report covers every bitmap in
 texture memory, including some the OS created, not just the app's.
+
+## Performance
+
+`perf`, `fps` and `monitor` read ECP `query/chanperf`, `query/graphics-frame-rate` (Roku OS 12.0+)
+and `query/r2d2-bitmaps`. Like `textures`, they need developer mode and **Control by mobile apps**
+enabled.
+
+```bash
+rokubot perf                          # one CPU/memory reading of the foreground app
+rokubot perf dev --duration 30 --out perf.csv --assert-max-mem 150
+rokubot fps --duration 10 --assert-min-p5 50   # fail if the slowest 5% of readings drop under 50 fps
+
+# Watch everything while a key script runs, then see which step cost what
+rokubot monitor dev --keys "down down select" --delay 2 --html report.html
+```
+
+`monitor` prints one row per sample, tagged with the key-script step that was running, then a
+summary per step. Without `--duration` it stops `--delay` seconds after the last key, or on Ctrl+C
+when there's no key script. `--json` and `--csv` print one line per sample as it arrives, for
+scripts. The queries for each sample run in parallel and the time they took is shown.
+
+The device measures CPU over a window (`--cpu-window`, 1 second by default) before `query/chanperf`
+answers, so that's how long a sample's queries take, and samples can't be closer together than
+that. The other queries answer in around 10 ms on a Roku Ultra, so polling barely loads the device.
+A shorter window gives faster but noisier CPU readings. Drop a metric with `--metrics` to skip its
+query.
+
+Asserts compare against the whole run: `--assert-max-mem`/`--assert-max-cpu` against the peak
+sample, `fps --assert-min` against the average and `--assert-min-p5` against the 5th percentile.
+Memory is in decimal megabytes, the same as texture memory.
 
 ## Known limitations
 
