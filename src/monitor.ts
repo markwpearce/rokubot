@@ -1,4 +1,5 @@
 import { formatBytes } from './textures';
+import { formatFps } from './fps';
 import { summarize, type Summary } from './sampling';
 
 export const MONITOR_METRICS = ['perf', 'textures', 'fps'] as const;
@@ -16,7 +17,10 @@ export interface MonitorSample {
   textureUsed?: number;
   textureMax?: number;
   fps?: number;
-  /** How long this sample's ECP queries took together - a rough measure of polling overhead. */
+  /**
+   * How long this sample's ECP queries took together. Mostly chanperf waiting out its CPU window;
+   * the rest is the polling cost.
+   */
   queryMs: number;
   errors?: string[];
 }
@@ -79,7 +83,12 @@ export function summarizeMonitor(samples: MonitorSample[], withSteps: boolean): 
   if (withSteps) {
     const byStep = new Map<string, MonitorSample[]>();
     for (const sample of samples) {
-      byStep.set(sample.step, [...(byStep.get(sample.step) ?? []), sample]);
+      const stepSamples = byStep.get(sample.step);
+      if (stepSamples) {
+        stepSamples.push(sample);
+      } else {
+        byStep.set(sample.step, [sample]);
+      }
     }
     summary.steps = [...byStep].map(([step, stepSamples]) => summarizeStep(step, stepSamples));
   }
@@ -102,7 +111,6 @@ export function formatCell(value: number | undefined, format: (value: number) =>
 }
 
 export const formatPercent = (value: number) => `${value.toFixed(1)}%`;
-export const formatFps = (value: number) => value.toFixed(1);
 
 export const MONITOR_TABLE_HEADER = `${'time'.padStart(7)}  ${'cpu'.padStart(6)}  ${'memory'.padStart(9)}  ${'texture'.padStart(9)}  ${'fps'.padStart(5)}  ${'query'.padStart(6)}  step`;
 
@@ -168,7 +176,8 @@ function chart(spec: ChartSpec, samples: MonitorSample[], duration: number, step
   if (points.length === 0) {
     return '';
   }
-  const top = Math.max(spec.max ?? 0, ...points.map((sample) => sample[spec.key]!)) || 1;
+  // reduce rather than spreading into Math.max, which overflows the stack on a long run
+  const top = points.reduce((max, sample) => Math.max(max, sample[spec.key]!), spec.max ?? 0) || 1;
   const plotWidth = CHART_WIDTH - PAD.left - PAD.right;
   const plotHeight = CHART_HEIGHT - PAD.top - PAD.bottom;
   const x = (elapsed: number) => PAD.left + (duration > 0 ? (elapsed / duration) * plotWidth : 0);
@@ -216,7 +225,7 @@ ${rows}
 export function renderMonitorHtml(samples: MonitorSample[], summary: MonitorSummary, title: string): string {
   const duration = samples.length > 0 ? samples[samples.length - 1]!.elapsed : 0;
   const stepStarts = samples.filter((sample, index) => index > 0 && sample.step !== samples[index - 1]!.step);
-  const textureMax = Math.max(0, ...samples.map((sample) => sample.textureMax ?? 0)) || undefined;
+  const textureMax = samples.reduce((max, sample) => Math.max(max, sample.textureMax ?? 0), 0) || undefined;
   const charts = [
     chart({ title: 'CPU', key: 'cpuPercent', format: formatPercent }, samples, duration, stepStarts),
     chart({ title: 'Memory used', key: 'memoryUsed', format: formatBytes }, samples, duration, stepStarts),

@@ -120,6 +120,9 @@ export class EcpClient {
    * answers, so the call takes at least that long.
    */
   async getChanperf(appId?: string, cpuWindowSeconds?: number): Promise<ChanperfSample> {
+    if (cpuWindowSeconds !== undefined && !(cpuWindowSeconds > 0)) {
+      throw new Error(`Invalid CPU window '${cpuWindowSeconds}' - must be a number of seconds greater than 0`);
+    }
     let urlPath = '/query/chanperf';
     if (appId) {
       urlPath += `/${encodeURIComponent(appId)}`;

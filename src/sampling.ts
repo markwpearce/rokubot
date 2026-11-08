@@ -42,10 +42,16 @@ export interface SampleLoopOptions {
   tick: (elapsedSeconds: number) => Promise<void>;
 }
 
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
- * Ticks on a fixed schedule from the start time rather than sleeping a fixed interval after each
- * tick, so a slow ECP query doesn't make samples drift further apart over a long run. Ctrl+C ends
- * the loop (instead of the process) so the caller still gets to print its summary.
+ * Ticks on a fixed schedule rather than sleeping a fixed interval after each tick, so a slow ECP
+ * query doesn't make samples drift further apart over a long run. When a tick runs past its slot
+ * (e.g. a query hangs until it times out) the schedule restarts from now, rather than firing every
+ * missed slot back-to-back. Ctrl+C ends the loop (instead of the process) so the caller still gets
+ * to print its summary.
  */
 export async function sampleLoop(options: SampleLoopOptions): Promise<void> {
   let stopped = false;
@@ -59,14 +65,15 @@ export async function sampleLoop(options: SampleLoopOptions): Promise<void> {
   void options.stop?.then(stop);
   try {
     const start = Date.now();
-    for (let tick = 0; !stopped; tick++) {
+    let nextAt = start;
+    while (!stopped) {
       const elapsedSeconds = (Date.now() - start) / 1000;
       if (options.durationSeconds !== undefined && elapsedSeconds >= options.durationSeconds) {
         break;
       }
       await options.tick(elapsedSeconds);
-      const nextAt = start + (tick + 1) * options.intervalSeconds * 1000;
-      const waitMs = Math.max(0, nextAt - Date.now());
+      nextAt = Math.max(nextAt + options.intervalSeconds * 1000, Date.now());
+      const waitMs = nextAt - Date.now();
       if (!stopped && waitMs > 0) {
         await new Promise<void>((resolve) => {
           const timer = setTimeout(resolve, waitMs);
@@ -81,6 +88,41 @@ export async function sampleLoop(options: SampleLoopOptions): Promise<void> {
     process.removeListener('SIGINT', stop);
     process.removeListener('SIGTERM', stop);
   }
+}
+
+export interface CollectedSamples<T> {
+  samples: T[];
+  /** Queries that failed. One failure shouldn't end a long run, so they're counted instead. */
+  errors: string[];
+}
+
+/** Runs `query` every interval for `perf`/`fps --watch/--duration`, printing each result as it arrives. */
+export async function collectSamples<T>(options: {
+  intervalSeconds: number;
+  durationSeconds?: number;
+  query: () => Promise<T>;
+  onSample: (sample: T) => void;
+  onError: (error: unknown) => void;
+}): Promise<CollectedSamples<T>> {
+  const collected: CollectedSamples<T> = { samples: [], errors: [] };
+  await sampleLoop({
+    intervalSeconds: options.intervalSeconds,
+    durationSeconds: options.durationSeconds,
+    tick: async () => {
+      try {
+        const sample = await options.query();
+        collected.samples.push(sample);
+        options.onSample(sample);
+      } catch (error) {
+        collected.errors.push(error instanceof Error ? error.message : String(error));
+        options.onError(error);
+      }
+    },
+  });
+  if (collected.samples.length === 0) {
+    throw new Error(collected.errors[0] ?? 'No samples were taken');
+  }
+  return collected;
 }
 
 export function validateSampling(intervalSeconds: number, durationSeconds?: number): void {

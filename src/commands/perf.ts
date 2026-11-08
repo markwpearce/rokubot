@@ -5,7 +5,7 @@ import { printResult, printError } from '../output';
 import type { GlobalArgs } from '../cli-types';
 import { formatBytes } from '../textures';
 import type { ChanperfSample } from '../perf';
-import { round, sampleLoop, summarize, validateSampling, writeSamplesFile, type Summary } from '../sampling';
+import { collectSamples, round, summarize, validateSampling, writeSamplesFile, type Summary } from '../sampling';
 
 interface PerfArgs extends GlobalArgs {
   appId?: string;
@@ -151,32 +151,15 @@ export const perfCommand: CommandModule<GlobalArgs, PerfArgs> = {
       let samples: ChanperfSample[];
 
       if (argv.watch || argv.duration !== undefined) {
-        samples = [];
-        const errors: string[] = [];
-        await sampleLoop({
+        const collected = await collectSamples({
           intervalSeconds: argv.interval,
           durationSeconds: argv.duration,
-          tick: async () => {
-            const time = new Date().toLocaleTimeString();
-            try {
-              const sample = await ecp.getChanperf(argv.appId, argv.cpuWindow);
-              samples.push(sample);
-              if (!argv.json) {
-                console.log(`${time}  ${sampleLine(sample)}`);
-              }
-            } catch (error) {
-              // One failed query shouldn't end a long run; it's counted in the summary instead.
-              errors.push(error instanceof Error ? error.message : String(error));
-              if (!argv.json) {
-                printError(error, false);
-              }
-            }
-          },
+          query: () => ecp.getChanperf(argv.appId, argv.cpuWindow),
+          onSample: (sample) => !argv.json && console.log(`${new Date().toLocaleTimeString()}  ${sampleLine(sample)}`),
+          onError: (error) => !argv.json && printError(error, false),
         });
-        if (samples.length === 0) {
-          throw new Error(errors[0] ?? 'No samples were taken');
-        }
-        Object.assign(result, { samples, summary: summarizePerf(samples), errors });
+        samples = collected.samples;
+        Object.assign(result, { samples, summary: summarizePerf(samples), errors: collected.errors });
       } else {
         const sample = await ecp.getChanperf(argv.appId, argv.cpuWindow);
         samples = [sample];

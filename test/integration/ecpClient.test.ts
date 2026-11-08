@@ -125,6 +125,11 @@ describe('EcpClient', () => {
     expect(requests).toEqual([{ method: 'GET', url: '/query/chanperf/dev?duration-seconds=3' }]);
   });
 
+  it('getChanperf rejects a cpu window that is not positive', async () => {
+    await expect(client().getChanperf(undefined, -10)).rejects.toThrow(/Invalid CPU window '-10'/);
+    expect(requests).toEqual([]);
+  });
+
   it('getGraphicsFrameRate queries graphics-frame-rate and parses it', async () => {
     const sample = await client().getGraphicsFrameRate();
     expect(requests).toEqual([{ method: 'GET', url: '/query/graphics-frame-rate' }]);

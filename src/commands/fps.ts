@@ -3,8 +3,8 @@ import { EcpClient } from '../ecp/client';
 import { resolveConfig } from '../config';
 import { printResult, printError } from '../output';
 import type { GlobalArgs } from '../cli-types';
-import type { FrameRateSample } from '../fps';
-import { sampleLoop, summarize, validateSampling, writeSamplesFile, type Summary } from '../sampling';
+import { formatFps, type FrameRateSample } from '../fps';
+import { collectSamples, summarize, validateSampling, writeSamplesFile, type Summary } from '../sampling';
 
 interface FpsArgs extends GlobalArgs {
   watch: boolean;
@@ -22,10 +22,6 @@ interface FpsResult {
   errors?: string[];
   savedTo?: string;
   failures: string[];
-}
-
-function formatFps(value: number): string {
-  return value.toFixed(1);
 }
 
 /** --assert-min checks the average; --assert-min-p5 the 5th percentile, to catch stutter an average hides. */
@@ -89,31 +85,15 @@ export const fpsCommand: CommandModule<GlobalArgs, FpsArgs> = {
       let samples: FrameRateSample[];
 
       if (argv.watch || argv.duration !== undefined) {
-        samples = [];
-        const errors: string[] = [];
-        await sampleLoop({
+        const collected = await collectSamples({
           intervalSeconds: argv.interval,
           durationSeconds: argv.duration,
-          tick: async () => {
-            const time = new Date().toLocaleTimeString();
-            try {
-              const sample = await ecp.getGraphicsFrameRate();
-              samples.push(sample);
-              if (!argv.json) {
-                console.log(`${time}  ${formatFps(sample.fps).padStart(5)} fps`);
-              }
-            } catch (error) {
-              errors.push(error instanceof Error ? error.message : String(error));
-              if (!argv.json) {
-                printError(error, false);
-              }
-            }
-          },
+          query: () => ecp.getGraphicsFrameRate(),
+          onSample: (sample) => !argv.json && console.log(`${new Date().toLocaleTimeString()}  ${formatFps(sample.fps).padStart(5)} fps`),
+          onError: (error) => !argv.json && printError(error, false),
         });
-        if (samples.length === 0) {
-          throw new Error(errors[0] ?? 'No samples were taken');
-        }
-        Object.assign(result, { samples, summary: summarize(samples.map((sample) => sample.fps)), errors });
+        samples = collected.samples;
+        Object.assign(result, { samples, summary: summarize(samples.map((sample) => sample.fps)), errors: collected.errors });
       } else {
         const sample = await ecp.getGraphicsFrameRate();
         samples = [sample];

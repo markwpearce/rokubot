@@ -74,6 +74,24 @@ describe('sampleLoop', () => {
     expect(ticks.length).toBeLessThanOrEqual(5);
   });
 
+  it("doesn't fire missed ticks back-to-back after a slow one", async () => {
+    const ticks: number[] = [];
+    await sampleLoop({
+      intervalSeconds: 0.02,
+      durationSeconds: 0.12,
+      tick: async (elapsed) => {
+        ticks.push(elapsed);
+        if (ticks.length === 1) {
+          await new Promise((resolve) => setTimeout(resolve, 70));
+        }
+      },
+    });
+    // Only the tick right after the stall can run immediately; the rest keep their spacing.
+    for (let i = 2; i < ticks.length; i++) {
+      expect(ticks[i]! - ticks[i - 1]!).toBeGreaterThanOrEqual(0.015);
+    }
+  });
+
   it('stops early when the stop promise resolves', async () => {
     let ticks = 0;
     await sampleLoop({

@@ -6,7 +6,7 @@ import { resolveConfig } from '../config';
 import { printError } from '../output';
 import { resolveKey } from '../keys';
 import type { GlobalArgs } from '../cli-types';
-import { csvHeader, csvLine, round, sampleLoop, validateSampling, writeSamplesFile } from '../sampling';
+import { csvHeader, csvLine, round, sampleLoop, sleep, validateSampling, writeSamplesFile } from '../sampling';
 import {
   MONITOR_CSV_COLUMNS,
   MONITOR_METRICS,
@@ -33,10 +33,6 @@ interface MonitorArgs extends GlobalArgs {
   csv: boolean;
   out?: string;
   html?: string;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function message(error: unknown): string {
