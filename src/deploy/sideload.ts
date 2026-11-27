@@ -43,6 +43,8 @@ export async function sideload(config: RokuConfig, input: SideloadInput): Promis
     password: config.password,
     zip: zipPath,
     deleteDevChannel: input.deleteDevChannel,
+    // roku-deploy >= alpha.10 presses Home before uploading by default; keep the previous behavior
+    close: false,
   });
 
   return { zipPath, message: result.message };
