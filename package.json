@@ -49,7 +49,7 @@
     "dotenv": "^16.4.5",
     "jimp": "^1.6.1",
     "needle": "^3.3.1",
-    "roku-deploy": "4.0.0-alpha.2",
+    "roku-deploy": "4.0.0-alpha.10",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

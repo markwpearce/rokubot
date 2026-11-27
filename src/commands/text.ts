@@ -31,10 +31,7 @@ export const textCommand: CommandModule<GlobalArgs, TextArgs> = {
     try {
       const config = resolveConfig({ host: argv.host, password: argv.password });
       const rokuDeploy = new RokuDeploy();
-      // SendTextOptions' type extends SendKeyEventOptions and declares `key` as required, but
-      // sendText() ignores any passed key and derives its own per-character `lit_<char>` key -
-      // the required `key` field is a type-only artifact of that inheritance.
-      await rokuDeploy.sendText({ host: config.host, text: argv.text } as Parameters<typeof rokuDeploy.sendText>[0]);
+      await rokuDeploy.sendText({ device: config.host, text: argv.text });
 
       const screenshotPath = argv.screenshot ? await captureScreenshot(config, undefined, argv.scale) : undefined;
       printResult(

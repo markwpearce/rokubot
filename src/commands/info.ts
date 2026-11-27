@@ -11,7 +11,7 @@ export const infoCommand: CommandModule<GlobalArgs, GlobalArgs> = {
     try {
       const config = resolveConfig({ host: argv.host, password: argv.password });
       const rokuDeploy = new RokuDeploy();
-      const deviceInfo = await rokuDeploy.getDeviceInfo({ host: config.host, enhance: true });
+      const deviceInfo = await rokuDeploy.getDeviceInfo({ device: config.host, enhance: true });
       printResult(
         deviceInfo,
         argv.json,
