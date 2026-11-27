@@ -1,7 +1,5 @@
-import type { RokuKey } from 'roku-deploy';
-
 /** Canonical key names accepted by the ECP API. */
-const ROKU_KEYS: readonly RokuKey[] = [
+const ROKU_KEYS = [
   'back',
   'backspace',
   'channeldown',
@@ -30,7 +28,10 @@ const ROKU_KEYS: readonly RokuKey[] = [
   'volumedown',
   'volumemute',
   'volumeup',
-];
+] as const;
+
+/** A key name accepted by the ECP keypress/keydown/keyup endpoints. */
+export type RokuKey = (typeof ROKU_KEYS)[number];
 
 const ROKU_KEY_SET = new Set<string>(ROKU_KEYS);
 

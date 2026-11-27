@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `EcpClient.getChanperf()`/`getGraphicsFrameRate()` and the perf, fps and monitor helpers in the
   programmatic API.
 
+### Changed
+
+- Updated `roku-deploy` to `4.0.0-alpha.10` (from `4.0.0-alpha.2`), which drops the deprecated
+  `postman-request` dependency tree.
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

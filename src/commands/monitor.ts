@@ -144,7 +144,7 @@ export const monitorCommand: CommandModule<GlobalArgs, MonitorArgs> = {
             return;
           }
           step = stepLabel(i, keys[i]!);
-          await rokuDeploy.keyPress({ host: config.host, key: keys[i]! });
+          await rokuDeploy.keyPress({ device: { host: config.host }, key: keys[i]! });
         }
         await sleep(argv.delay * 1000);
       };

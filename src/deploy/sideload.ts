@@ -23,30 +23,27 @@ export async function sideload(config: RokuConfig, input: SideloadInput): Promis
   const rokuDeploy = new RokuDeploy();
   const isZip = input.projectPathOrZip.toLowerCase().endsWith('.zip');
 
-  let outDir: string;
-  let outFile: string;
+  let zipPath: string;
 
   if (isZip) {
-    outDir = path.dirname(path.resolve(input.projectPathOrZip));
-    outFile = path.basename(input.projectPathOrZip, '.zip');
+    zipPath = path.resolve(input.projectPathOrZip);
   } else {
     const rootDir = path.resolve(input.projectPathOrZip);
     if (!fs.existsSync(path.join(rootDir, 'manifest'))) {
       throw new Error(`No 'manifest' file found in ${rootDir} - expected a Roku project root or a .zip file`);
     }
-    outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rokubot-package-'));
-    outFile = 'rokubot-package';
-    await rokuDeploy.stage({ rootDir, stagingDir: path.join(outDir, '.staging') });
-    await rokuDeploy.zip({ stagingDir: path.join(outDir, '.staging'), outDir, outFile });
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rokubot-package-'));
+    const stagingDir = path.join(outDir, '.staging');
+    await rokuDeploy.stage({ rootDir, out: stagingDir });
+    ({ zipPath } = await rokuDeploy.zip({ dir: stagingDir, out: path.join(outDir, 'rokubot-package.zip') }));
   }
 
   const result = await rokuDeploy.sideload({
-    host: config.host,
+    device: { host: config.host },
     password: config.password,
-    outDir,
-    outFile,
+    zip: zipPath,
     deleteDevChannel: input.deleteDevChannel,
   });
 
-  return { zipPath: path.join(outDir, `${outFile}.zip`), message: result.message };
+  return { zipPath, message: result.message };
 }

@@ -23,7 +23,15 @@ export async function captureScreenshot(
 ): Promise<string> {
   validateScale(scale);
   const rokuDeploy = new RokuDeploy();
-  const screenshotPath = await rokuDeploy.captureScreenshot({ host: config.host, password: config.password, screenshotDir });
+  const { filePath: screenshotPath } = await rokuDeploy.captureScreenshot({
+    device: { host: config.host },
+    password: config.password,
+    screenshotDir,
+    out: true,
+  });
+  if (!screenshotPath) {
+    throw new Error('Screenshot was captured but not saved to disk');
+  }
   if (scale < 1) {
     await scaleImageFile(screenshotPath, scale);
   }

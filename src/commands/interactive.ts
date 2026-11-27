@@ -1,7 +1,7 @@
 import type { CommandModule } from 'yargs';
 import * as readline from 'readline';
 import { RokuDeploy } from 'roku-deploy';
-import type { RokuKey } from 'roku-deploy';
+import type { RokuKey } from '../keys';
 import { resolveConfig } from '../config';
 import { printError } from '../output';
 import { openConsoleSocket, sendAndCollect } from './console';
@@ -99,7 +99,7 @@ function runInteractive(host: string): Promise<void> {
     };
 
     const send = (key: RokuKey) => {
-      rokuDeploy.keyPress({ host, key }).catch((error) => console.error(`Error: ${(error as Error).message}`));
+      rokuDeploy.keyPress({ device: { host }, key }).catch((error) => console.error(`Error: ${(error as Error).message}`));
     };
 
     const enterCommandMode = () => {
