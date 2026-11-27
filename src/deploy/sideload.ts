@@ -39,7 +39,7 @@ export async function sideload(config: RokuConfig, input: SideloadInput): Promis
   }
 
   const result = await rokuDeploy.sideload({
-    device: config.host,
+    device: { host: config.host },
     password: config.password,
     zip: zipPath,
     deleteDevChannel: input.deleteDevChannel,

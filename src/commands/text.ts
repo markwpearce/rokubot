@@ -31,7 +31,7 @@ export const textCommand: CommandModule<GlobalArgs, TextArgs> = {
     try {
       const config = resolveConfig({ host: argv.host, password: argv.password });
       const rokuDeploy = new RokuDeploy();
-      await rokuDeploy.sendText({ device: config.host, text: argv.text });
+      await rokuDeploy.sendText({ device: { host: config.host }, text: argv.text });
 
       const screenshotPath = argv.screenshot ? await captureScreenshot(config, undefined, argv.scale) : undefined;
       printResult(

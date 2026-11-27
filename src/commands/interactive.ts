@@ -99,7 +99,7 @@ function runInteractive(host: string): Promise<void> {
     };
 
     const send = (key: RokuKey) => {
-      rokuDeploy.keyPress({ device: host, key }).catch((error) => console.error(`Error: ${(error as Error).message}`));
+      rokuDeploy.keyPress({ device: { host }, key }).catch((error) => console.error(`Error: ${(error as Error).message}`));
     };
 
     const enterCommandMode = () => {

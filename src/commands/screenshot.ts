@@ -24,7 +24,7 @@ export async function captureScreenshot(
   validateScale(scale);
   const rokuDeploy = new RokuDeploy();
   const { filePath: screenshotPath } = await rokuDeploy.captureScreenshot({
-    device: config.host,
+    device: { host: config.host },
     password: config.password,
     screenshotDir,
     out: true,

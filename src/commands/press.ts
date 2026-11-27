@@ -65,11 +65,11 @@ export const pressCommand: CommandModule<GlobalArgs, PressArgs> = {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i]!;
         if (argv.action === 'keydown') {
-          await rokuDeploy.keyDown({ device: config.host, key });
+          await rokuDeploy.keyDown({ device: { host: config.host }, key });
         } else if (argv.action === 'keyup') {
-          await rokuDeploy.keyUp({ device: config.host, key });
+          await rokuDeploy.keyUp({ device: { host: config.host }, key });
         } else {
-          await rokuDeploy.keyPress({ device: config.host, key });
+          await rokuDeploy.keyPress({ device: { host: config.host }, key });
         }
         if (i < keys.length - 1 || argv.screenshot) {
           await sleep(argv.delay * 1000);
